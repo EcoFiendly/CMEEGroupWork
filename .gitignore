@@ -1,0 +1,23 @@
+# Whitelist
+!.gitkeep
+!README.md
+!.gitignore
+!/Code
+
+# Blacklist
+*~
+*.tmp
+#comment
+*.py[co]
+Sandbox
+*/Results/*.txt
+.vscode
+*.pdf
+*~
+*.aux
+*.dvi
+*.log
+*.nav
+*.out
+*.snm
+*.toc
