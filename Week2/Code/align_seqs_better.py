@@ -21,6 +21,7 @@ __license__ = ""
 
 ## Imports ##
 import sys # module to interface our program with the operating system
+import pickle
 
 ## Constants ##
 
@@ -101,11 +102,25 @@ def calculate_score(s1, s2, l1, l2, startpoint):
 # calculate_score(s1, s2, l1, l2, 1)
 # calculate_score(s1, s2, l1, l2, 5)
 
+pf = open('../Results/all_good_aligns.txt', 'wb')
+all_good = []
+
 for i in range(l1): # Note that you just take the last alignment with the highest score
     z = calculate_score(s1, s2, l1, l2, i)
     if z > my_best_score:
         my_best_align = "." * i + s2 # think about what this is doing!
-        my_best_score = z 
+        my_best_score = z
+        all_good = [] 
+        all_good.append(my_best_align)
+        all_good.append(my_best_score)
+    elif z == my_best_score:
+        my_best_align = "." * i + s2 # think about what this is doing!
+        my_best_score = z
+        all_good.append(my_best_align)
+        all_good.append(my_best_score)
+
+# write equally_good to pf
+pickle.dump(all_good, pf)
 
 print(my_best_align)
 print(s1)
@@ -113,6 +128,12 @@ print("Best score:", my_best_score)
 
 # Save output to a text file in /Results/ directory
 sys.stdout = open('../Results/best_align.txt', 'w')
-print("Best align is:", str(my_best_align))
-print("Best score is:", str(my_best_score))
+print("Best score is:", str(all_good[1]))
+print("Alignments with such score:")
+for i in range(len(all_good)):
+    if i % 2 == 0:
+        print(all_good[i])
+        print("")
+        print(s1)
+pf.close()
 sys.stdout.close()
