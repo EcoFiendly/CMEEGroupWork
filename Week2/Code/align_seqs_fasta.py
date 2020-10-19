@@ -5,7 +5,9 @@ Script that takes DNA sequences as input from a single external file and
 aligns two DNA sequences such that they are as similar as possible. The best 
 alignment, along with its corresponding score is then saved in a text file to 
 the /Results/ directory. 
-Also for practicing debugging via insertion of breakpoints
+
+This script is able to take user arguments from cli. However, if no arguments 
+were provided, the script defaults to two fasta files in the /Data/ directory.
 
 Script starts by positioning the beginning of the shorter sequence at all 
 positions (bases) of the longer one (the start position), and count the number 
@@ -14,7 +16,7 @@ in which case, an arbitrary alignment (e.g. first or last) with the highest
 score is taken.
 """
 
-__appname__ = '[align_seqs.py]'
+__appname__ = '[align_seqs_fasta.py]'
 __author__ = 'Yewshen Lim (y.lim20@imperial.ac.uk)'
 __version__ = '0.0.1'
 __license__ = ""
@@ -55,6 +57,7 @@ for row in seq2:
         s2.append(row)
 
 # convert the lists to strings
+
 s1 = "".join(s1)
 s2 = "".join(s2)
 
@@ -113,6 +116,7 @@ print("Best score:", my_best_score)
 
 # Save output to a text file in /Results/ directory
 sys.stdout = open('../Results/best_align.txt', 'w')
+# Write to the file
 print("Best align is:", str(my_best_align))
 print("Best score is:", str(my_best_score))
-sys.stdout.close()
+sys.stdout.close() # Close output file

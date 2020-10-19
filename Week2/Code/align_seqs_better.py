@@ -5,16 +5,21 @@ Script that takes DNA sequences as input from a single external file and
 aligns two DNA sequences such that they are as similar as possible. The best 
 alignment, along with its corresponding score is then saved in a text file to 
 the /Results/ directory. 
-Also for practicing debugging via insertion of breakpoints
+
+This script is able to take user arguments from cli. However, if no arguments 
+were provided, the script defaults to two fasta files in the /Data/ directory.
 
 Script starts by positioning the beginning of the shorter sequence at all 
 positions (bases) of the longer one (the start position), and count the number 
 of bases matched. The alignment with the highest score wins. Ties are possible, 
 in which case, an arbitrary alignment (e.g. first or last) with the highest 
 score is taken.
+
+This script also saves equally good alignments when they share the same score as
+the best alignment.
 """
 
-__appname__ = '[align_seqs.py]'
+__appname__ = '[align_seqs_better.py]'
 __author__ = 'Yewshen Lim (y.lim20@imperial.ac.uk)'
 __version__ = '0.0.1'
 __license__ = ""
@@ -102,24 +107,26 @@ def calculate_score(s1, s2, l1, l2, startpoint):
 # calculate_score(s1, s2, l1, l2, 1)
 # calculate_score(s1, s2, l1, l2, 5)
 
+# Open a file for pickle
 pf = open('../Results/all_good_aligns.txt', 'wb')
+# Create an empty list to capture the best score and equally good alignments
 all_good = []
 
 for i in range(l1): # Note that you just take the last alignment with the highest score
     z = calculate_score(s1, s2, l1, l2, i)
     if z > my_best_score:
-        my_best_align = "." * i + s2 # think about what this is doing!
+        my_best_align = "." * i + s2
         my_best_score = z
-        all_good = [] 
+        all_good = [] # empty out scores which are worse than current one
         all_good.append(my_best_align)
         all_good.append(my_best_score)
     elif z == my_best_score:
-        my_best_align = "." * i + s2 # think about what this is doing!
+        my_best_align = "." * i + s2
         my_best_score = z
         all_good.append(my_best_align)
         all_good.append(my_best_score)
 
-# write equally_good to pf
+# write all_good to pf
 pickle.dump(all_good, pf)
 
 print(my_best_align)
@@ -130,10 +137,11 @@ print("Best score:", my_best_score)
 sys.stdout = open('../Results/best_align.txt', 'w')
 print("Best score is:", str(all_good[1]))
 print("Alignments with such score:")
+# for loop to write all the equally good alignments (if > 1) to the output file
 for i in range(len(all_good)):
     if i % 2 == 0:
         print(all_good[i])
         print("")
         print(s1)
-pf.close()
-sys.stdout.close()
+pf.close() # close pickle file
+sys.stdout.close() # close output file
