@@ -28,7 +28,7 @@ import sys # module to interface our program with the operating system
 
 # Read cli arguments using the sys module
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     print("No arguments provided, defaulting to 2 fasta files in ../Data/")
     # opens the default files
     with open('../Data/407228326.fasta', 'r') as f1:
@@ -77,9 +77,23 @@ my_best_score = -1
 
 ## Functions ##
 
-# A function that computes a score by returning the number of matches starting
-# from arbitrary startpoint (chosen by user)
 def calculate_score(s1, s2, l1, l2, startpoint):
+    """
+    Computes a score by returning the number of matches starting from an 
+    arbitrary startpoint (chosen by user)
+
+        Parameters:
+            s1 (str): string containing the longer sequence
+            s2 (str): string containing the shorter sequence
+            l1 (int): length of s1
+            l2 (int): length of s2
+            startpoint: arbitrary startpoint chosen by user
+
+        Returns:
+            score (int): number of matches between the sequences
+            matched (str): matched string with * as match and - as no match
+
+    """
     matched = "" # to hold string displaying alignements
     score = 0
     for i in range(l2):
@@ -90,12 +104,12 @@ def calculate_score(s1, s2, l1, l2, startpoint):
             else:
                 matched = matched + "-"
 
-    # some formatted output
-    print("." * startpoint + matched)           
-    print("." * startpoint + s2)
-    print(s1)
-    print(score) 
-    print(" ")
+    # some formatted output, commented out to speed up the code
+    # print("." * startpoint + matched)           
+    # print("." * startpoint + s2)
+    # print(s1)
+    # print(score) 
+    # print(" ")
 
     return score
 

@@ -32,7 +32,7 @@ import pickle
 
 # Read cli arguments using the sys module
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 3:
     print("No arguments provided, defaulting to 2 fasta files in ../Data/")
     # opens the default files
     with open('../Data/407228326.fasta', 'r') as f1:
@@ -83,6 +83,22 @@ my_best_score = -1
 # A function that computes a score by returning the number of matches starting
 # from arbitrary startpoint (chosen by user)
 def calculate_score(s1, s2, l1, l2, startpoint):
+    """
+    Computes a score by returning the number of matches starting from an 
+    arbitrary startpoint (chosen by user)
+
+        Parameters:
+            s1 (str): string containing the longer sequence
+            s2 (str): string containing the shorter sequence
+            l1 (int): length of s1
+            l2 (int): length of s2
+            startpoint: arbitrary startpoint chosen by user
+
+        Returns:
+            score (int): number of matches between the sequences
+            matched (str): matched string with * as match and - as no match
+
+    """
     matched = "" # to hold string displaying alignements
     score = 0
     for i in range(l2):
@@ -93,12 +109,12 @@ def calculate_score(s1, s2, l1, l2, startpoint):
             else:
                 matched = matched + "-"
 
-    # some formatted output
-    print("." * startpoint + matched)           
-    print("." * startpoint + s2)
-    print(s1)
-    print(score) 
-    print(" ")
+    # some formatted output, commented out to speed up the code
+    # print("." * startpoint + matched)           
+    # print("." * startpoint + s2)
+    # print(s1)
+    # print(score) 
+    # print(" ")
 
     return score
 
@@ -108,7 +124,7 @@ def calculate_score(s1, s2, l1, l2, startpoint):
 # calculate_score(s1, s2, l1, l2, 5)
 
 # Open a file for pickle
-pf = open('../Results/all_good_aligns.txt', 'wb')
+pf = open('../Results/all_good_aligns.txt', 'wb') # save pickle file as .p (or else might run into issues saving and reopening later)
 # Create an empty list to capture the best score and equally good alignments
 all_good = []
 
@@ -128,6 +144,7 @@ for i in range(l1): # Note that you just take the last alignment with the highes
 
 # write all_good to pf
 pickle.dump(all_good, pf)
+pf.close()
 
 print(my_best_align)
 print(s1)
@@ -135,6 +152,8 @@ print("Best score:", my_best_score)
 
 # Save output to a text file in /Results/ directory
 sys.stdout = open('../Results/best_align.txt', 'w')
+pf = open('../Results/all_good_aligns.txt', 'rb')
+all_good = pickle.load(pf)
 print("Best score is:", str(all_good[1]))
 print("Alignments with such score:")
 # for loop to write all the equally good alignments (if > 1) to the output file
