@@ -69,6 +69,8 @@ else:
 
 # A function that computes a score by returning the number of matches starting
 # from arbitrary startpoint (chosen by user)
+#doing dog string for all defined functions
+""" docstring here """"
 def calculate_score(s1, s2, l1, l2, startpoint):
     matched = "" # to hold string displaying alignements
     score = 0
