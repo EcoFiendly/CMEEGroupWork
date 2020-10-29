@@ -10,10 +10,10 @@
 # ARGUMENTS
 # args: cli argument as input file
 # degrees: The angle of elevation of tree
-# distance: The distance from base of tree (e.ge, meters)
+# distance: The distance from base of tree (e.g. meters)
 #
 # OUTPUT
-# The heights of the tree, same units as "distance"
+# The height of the trees, same units as "distance"
 
 # Take cli arguments
 args <- commandArgs(trailingOnly = TRUE)
