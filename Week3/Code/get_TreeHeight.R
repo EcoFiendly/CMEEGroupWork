@@ -8,6 +8,7 @@
 # height = distance * tan(radians)
 #
 # ARGUMENTS
+# args: cli argument as input file
 # degrees: The angle of elevation of tree
 # distance: The distance from base of tree (e.ge, meters)
 #
@@ -25,23 +26,16 @@ numrow <- nrow(TreeData)
 TreeHeight <- function(degrees, distance) {
     radians <- degrees * pi / 180
     height <- distance * tan(radians)
-    print(paste("Tree height is:", height))
+    # print(paste("Tree height is:", height))
 
     return(height)
 }
 
-# # Add output of TreeHeight for each tree to new column in TreeData
-# Tree.Height.m <- c()
-# for (i in 1:numrow) {
-#     distance <- as.numeric(TreeData$Distance.m[i])
-#     degrees <- as.numeric(TreeData$Angle.degrees[i])
-#     height <- TreeHeight(degrees, distance)
-#     Tree.Height.m[i] <- height
-# }
-
+# Add output of TreeHeight for each tree to new column in TreeData
 TreeData$Tree.Height.m <- TreeHeight(TreeData$Angle.degrees,
      TreeData$Distance.m)
 
+# strip path and extension from input file
 inputname <- tools::file_path_sans_ext(basename(args[1]))
 # Write to output file in Results
 write.csv(TreeData, paste0("../Results/", inputname, "_treeheights.csv"))
