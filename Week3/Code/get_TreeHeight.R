@@ -20,8 +20,6 @@ args <- commandArgs(trailingOnly = TRUE)
 
 # Read trees.csv file
 TreeData <- read.csv(args, header = TRUE)
-# store number of rows in numrow
-numrow <- nrow(TreeData)
 
 TreeHeight <- function(degrees, distance) {
     radians <- degrees * pi / 180
