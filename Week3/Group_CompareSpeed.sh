@@ -22,3 +22,5 @@ Rscript Vectorize2.R
 echo ""
 echo "Running time of Vectorize2.py"
 python Vectorize2.py
+
+cd ..
