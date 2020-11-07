@@ -21,3 +21,5 @@ Results
 *.out
 *.snm
 *.toc
+*.Rhistory
+Week2/Code/ben_align_seqs_fasta_pre-pt2.py
