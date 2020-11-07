@@ -10,7 +10,7 @@
 #comment
 *.py[co]
 Sandbox
-*/Results/*.txt
+Results
 .vscode
 *.pdf
 *~

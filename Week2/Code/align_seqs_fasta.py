@@ -135,7 +135,7 @@ def main(argv):
             f.close()     
     print("Done!")
 
-    return(0)
+    return 0
         
 if (__name__ == "__main__"):
     status = main(sys.argv)
