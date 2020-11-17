@@ -11,62 +11,63 @@
 # OUTPUT
 # time it takes for the non-vectorised and vectorised functions stochrick and stockrickvect to run
 
-rm(list=ls())
-
-stochrick<-function(p0=runif(1000,.5,1.5),r=1.2,K=1,sigma=0.2,numyears=100)
-{
-  #initialize
-  N<-matrix(NA,numyears,length(p0))
-  N[1,]<-p0
-  
-  for (pop in 1:length(p0)){#loop through the populations: for every pop in row 1
-    
-    for (yr in 2:numyears){ #for each pop, loop through the years
-
-      N[yr,pop] <- N[yr-1,pop] * exp(r * (1 - N[yr - 1,pop] / K) + rnorm(1,0,sigma))
-    
-    }
-  
-  }
- return(N)
-
-}
-
-print("Stochastic Ricker takes:")
-print(system.time(res1<-stochrick()))
 
 # Now write another function called stochrickvect that vectorizes the above 
 # to the extent possible, with improved performance: 
-
-def stochrickvect():
-    p0,r=1.2,K=1,sigma=0.2,numyears=100 #runif() generates random deviates from a min of .5 to a max of 1.5
-    for x in range(1000):
-        p0 = random.uniform (0.5, 1.5)
-'''
-r =1.2
-K= 1
-sigma = 0.2
-numyears =100 #check what type of variable is numyears!!
-
-import random
-p0 = [] #generates random deviates from a min of .5 to a max of 1.5
-for i in range (0,1000):
-    x = random.uniform(0.5,1.5)
-    p0.append(x)
-    print (p0)
-return(p0)
-
 import numpy as np
-N=[] with rows being numyears and columns being p0
+import time #to calculate runtime
 
-for i in N[0:]:#loop through the populations
-    
-    for y in N[:i]: #for each pop, loop through the years
+def stochrick(p0= np.random.uniform(0.5,1.5,1000), r=1.2, K=1, sigma=0.2, numyears=100): 
+"""function that applies the stochastic Ricker equation to some populations
 
-        N[yr,pop]= N[yr-1,pop] * exp(r * (1 - N[yr - 1,pop] / K) + rnorm(1,0,sigma))
-    
-    }
-  
-  }
- return(N)
+    parameters:
+      p0= initial population density (allows gaussian fluctuations)
+      r= intrisic growth rate
+      K= carrying capacity of the population
+      sigma= environmental process noise 
+      numyears= number of generations over which the equation is run
+
+    output:
+    N= density of population after numyears """
+
+    N= np.zeros((numyears, len(p0)))
+    N[1,] = p0
+    for pop in range(0,len(p0)):
+        for year in range(1,numyears): #for all populations, loop through the years
+            N[year,pop]= N[year-1,pop] * np.exp(r * (1 - N[year - 1,pop] / K) + np.random.normal(0,sigma,1)) #rnorm[number of,mean,var] vs np.random.normal(mean,SD, size)
+    return N
+
+def stochrickvect(p0= np.random.uniform(0.5,1.5,1000), r=1.2, K=1, sigma=0.2, numyears=100):
+"""function that applies the stochastic Ricker equation to some populations
+
+    parameters:
+      p0= initial population density (allows gaussian fluctuations)
+      r= intrisic growth rate
+      K= carrying capacity of the population
+      sigma= environmental process noise 
+      numyears= number of generations over which the equation is run
+
+    output:
+    N= density of population after numyears """
+
+    N= np.zeros((numyears, len(p0)))
+    N[1,] = p0
+    for year in range(numyears): #for all populations, loop through the years
+        N[year,]= N[year-1,] * np.exp(r * (1 - N[year - 1,] / K) + np.random.normal(0,sigma,1)) #rnorm[number of,mean,var] vs np.random.normal(mean,SD, size)
+
+    return N
+
+#compare runtime of non-vectorised and vectorised function
+start= time.time()
+stochrick()
+end=time.time()
+print("Time taken for the non-vectorised function to run:")
+print(end-start)
+
+startv=time.time()
+stochrickvect()
+endv=time.time()
+print("Time taken for the vectorised function to run:")
+print(endv-startv)
+
 
