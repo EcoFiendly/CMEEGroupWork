@@ -9,107 +9,58 @@
 # Arguments:0
 # Date: October 2020
 
-rm(list=ls())
+rm(list = ls())
 
-library(dplyr)
-library(ggplot2)
+#Import data
+data = read.csv("../Data/EcolArchives-E089-51-D1.csv")
 
-Data <- read.csv("../Data/EcolArchives-E089-51-D1.csv", header=T)
-head(Data)
+FeedType = names(table(data$Type.of.feeding.interaction))
+PredatorStage = names(table(data$Predator.lifestage))
+Loc = names(table(data$Location))
 
-#create subsets of the data by feeding types
-Data_loc <- Data %>% group_by(Location)%>%
-summarise(
-    intercept <- summary(lm(log(Predator.mass)~log(Prey.mass)))$coefficients[1,1],
-    slope <- summary(lm(log(Predator.mass)~log(Prey.mass)))$coefficients[2,1],
-    rsquared <- summary(lm(log(Predator.mass)~log(Prey.mass)))$r.squared,
-    fstatistic <- summary(lm(log(Predator.mass)~log(Prey.mass)))$fstatistic[1],
-    pvalue <- summary(lm(log(Predator.mass)~log(Prey.mass)))$coefficients[2,4],
-    .groups='drop'
-)
-  
-#write csv with Summary in it
-write.csv(Data_loc, "../Results/PP_Regress_loc_res.csv")
-
-##MyDF.I
-counter <- 0
-for ( i in unique(MyDF.I$Predator.lifestage) ){
-  #create a subset data 
-  data_sub <- subset(MyDF.I, Predator.lifestage == i)
-  
-  counter <- counter + 1
-  #create the linear model. If it is the first loop,
-  #then the model name will be lm_ins1
-  j <- assign(paste("lm_I",counter,sep = ""), lm(Prey.mass ~ Predator.mass, data_sub))
-
-  #show many lms created
-  assign(paste("lm_I", counter, sep = ""), res_linear(j))
-}
-##MyDF.P
-counter <- 0
-for ( i in unique(MyDF.P$Predator.lifestage) ){
-  #create a subset data 
-  data_sub <- subset(MyDF.P, Predator.lifestage == i)
-  
-  counter <- counter + 1
-  #create the linear model. If it is the first loop,
-  #then the model name will be lm_ins1
-  j <- assign(paste("lm_P",counter,sep = ""), lm(Prey.mass ~ Predator.mass, data_sub))
-
-  #show many lms created
-  assign(paste("lm_P", counter, sep = ""), fun1(j))
-}
-##MyDF.PL
-counter <- 0
-for ( i in unique(MyDF.PL$Predator.lifestage) ){
-  #create a subset data 
-  data_sub <- subset(MyDF.PL, Predator.lifestage == i)
-  
-  counter <- counter + 1
-  #create the linear model. If it is the first loop,
-  #then the model name will be lm_ins1
-  j <- assign(paste("lm_PL",counter,sep = ""), lm(Prey.mass ~ Predator.mass, data_sub))
-
-  #show many lms created
-  assign(paste("lm_PL", counter, sep = ""), fun1(j))
-}
-##MyDF.PR
-counter <- 0
-for ( i in unique(MyDF.PR$Predator.lifestage) ){
-  #create a subset data 
-  data_sub <- subset(MyDF.PR, Predator.lifestage == i)
-  
-  counter <- counter + 1
-  #create the linear model. If it is the first loop,
-  #then the model name will be lm_ins1
-  j <- assign(paste("lm_PR",counter,sep = ""), lm(Prey.mass ~ Predator.mass, data_sub))
-
-  #show many lms created
-  assign(paste("lm_PR", counter, sep = ""), fun1(j))
-}
-##MyDF.PP
-counter <- 0
-for ( i in unique(MyDF.PP$Predator.lifestage) ){
-  #create a subset data 
-  data_sub <- subset(MyDF.PP, Predator.lifestage == i)
-  
-  counter <- counter + 1
-  #create the linear model. If it is the first loop,
-  #then the model name will be lm_ins1
-  j <- assign(paste("lm_PP",counter,sep = ""), lm(Prey.mass ~ Predator.mass, data_sub))
-
-  #show many lms created
-  
-  assign(paste("lm_PP", counter, sep = ""), fun1(j))
+RegTitle = c("slope", "intercept", "adjusted-R^2", 
+             "F-statistic", "p-value")
+library(broom)
+#Summary of linear model
+lmSum = function(a,b){
+  c = rep(NA, 5)
+  mol = lm(a~b)
+  sum = unlist(summary(mol))
+  c[1] = sum$coefficients2
+  c[2] = sum$coefficients1
+  c[3] = sum$adj.r.square
+  c[4] = sum$fstatistic.value
+  c[5] = unname(glance(mol)$p.value)
+  return(c)
 }
 
-# bind by columns
-resh <- cbind(lm_I1, lm_P1, lm_P2, lm_P3, lm_P4, lm_P5, lm_PL1, lm_PL2, lm_PL4,
-             lm_PL5, lm_PR1, lm_PR2, lm_PR3, lm_PR4, lm_PR5, lm_PR6, lm_PP1)
-# name the columns
-colnames(resh)<- c("lm_I1", "lm_P1", "lm_P2", "lm_P3", "lm_P4", "lm_P5", "lm_PL1", "lm_PL2", "lm_PL4",
-             "lm_PL5", "lm_PR1", "lm_PR2", "lm_PR3", "lm_PR4", "lm_PR5", "lm_PR6", "lm_PP1")
-final <- data.frame(t(resh))[,-c(5:6)] #transpose the results so that the regression outputs are the columns and the models are the rows, remove df and variance column
-
-#write csv with Summary in it
-write.csv(final, "../Results/PP_Regress_Results.csv")
+Reg_loc = data.frame(RegTitle)
+n = names(Reg_loc)
+k = 2 #because the first item is RegTitle
+for (i in FeedType){
+  for (j in PredatorStage){
+    for (l in Loc){
+      d = subset(data,
+                 data$Type.of.feeding.interaction == i &
+                  data$Predator.lifestage == j &
+                   data$Location == l)
+      if (nrow(d) >2){
+        n[k] = paste(i,j,l,sep = "_")
+        k = k + 1
+        mod= unlist(summary(lm(log(Predator.mass) ~ log(Prey.mass), data)
+        a = c(summary(mod)$coeff[2], summary(mod)$coeff[1],
+         summary(mod)$adj.r.squared, summary(mod)$fstatistic[1],
+         summary(mod)$coeff[8])
+        Reg_loc = cbind(Reg_loc, a)
+      names(Reg_loc) = n
+      }
+    }
+  }
+}
+Reg_loc
+#For combination "piscivorous", "juvenile" and "Off the Bay of Biscay",
+#R-square is 0, indicating no correlation. That is why the loops output
+#an error: since R-square is 0, F-test was not conducted, and 
+#no F statistic available. This combination is not in Reg_loc
+write.csv(t(Reg_loc),"../Results/PP_Regress_loc_Results.csv")
+  
