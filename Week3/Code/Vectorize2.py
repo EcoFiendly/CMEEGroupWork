@@ -30,7 +30,7 @@ def stochrick(p0 = np.random.uniform(.5, 1.5, 1000), \
     """
     # initialize
     N = np.zeros((numyears, len(p0)))
-    N[1, ] = p0
+    N[0, ] = p0
 
     # loop  through the populations
     for pop in range(1, len(p0)):
@@ -62,7 +62,7 @@ def stochrickvect(p0 = np.random.uniform(.5, 1.5, 1000), \
     """
     # initialize
     N = np.zeros((numyears, len(p0)))
-    N[1, ] = p0
+    N[0, ] = p0
 
     # loop through all populations together by year
     for yr in range(numyears):
