@@ -5,13 +5,17 @@ This script is the translated version of get_TreeHeight.R
 """
 
 __author__ = 'Group 4'
-__versin__ = '0.0.1'
+__version__ = '0.0.1'
 
 import sys
 import numpy as np
 
-# translate sys.argv to open file
-inpu = sys.argv[1]
+# check for user input
+if len(sys.argv) == 1:
+    inpu = "../Data/trees.csv"
+else:
+    inpu = sys.argv[1]
+# open file
 file = open(inpu, "r")
 
 # initialize empty list
@@ -47,7 +51,7 @@ for i in range(1,len(data)):
     data[i].append(height)
 
 # set name of output file
-result_name = "../Results/" + inpu.split("/")[1].split(".")[0] + "_treeheights.csv"
+result_name = "../Results/py_" + inpu.split("/")[1].split(".")[0] + "_treeheights.csv"
 result = open(result_name, "w")
 # write to results
 for i in data:
