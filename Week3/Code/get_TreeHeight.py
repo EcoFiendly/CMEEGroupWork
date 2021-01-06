@@ -51,7 +51,7 @@ for i in range(1,len(data)):
     data[i].append(height)
 
 # set name of output file
-result_name = "../Results/py_" + inpu.split("/")[1].split(".")[0] + "_treeheights.csv"
+result_name = "../Results/py_" + inpu.split("/")[2].split(".")[0] + "_treeheights.csv"
 result = open(result_name, "w")
 # write to results
 for i in data:

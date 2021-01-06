@@ -41,4 +41,4 @@ linreg <- df %>%
   # remove mod column
   dplyr::select(-mod)
 
-write.csv(linreg, "../Results/PP_Regress_Results.csv")
+write.csv(linreg, "../Results/PP_Regress_loc_Results.csv")
