@@ -10,6 +10,7 @@
 rm(list = ls())
 
 require(tidyverse)
+require(broom)
 
 # load data
 df <- read.csv("../Data/EcolArchives-E089-51-D1.csv")

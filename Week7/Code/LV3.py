@@ -13,20 +13,6 @@ import numpy as np
 import matplotlib.pylab as p
 import sys
 
-# define time vector, integrate from time point 0 to 15, using 1000
-# sub-divisions of time
-# note that units of time are arbitrary here
-t = np.linspace(0, 15, 1000)
-
-# set initial conditions for two populations (10 resources and 5 consumers per 
-# unit area), and convert the two into an array (because our dCR_dt function
-# takes an array as input)
-R0 = 10
-C0 = 5
-
-# set K, which is the carrying capacity
-K = 33
-
 def main(r = 1.0, a = 0.1, z = 1.5, e = 0.75):
     """
     Calculates the population density at each time step using the discrete-time
@@ -47,7 +33,23 @@ def main(r = 1.0, a = 0.1, z = 1.5, e = 0.75):
         e (float): consumer's efficiency (a fraction) in converting 
                    resource to consumer biomass
     """
-    popu = np.zeros([len(t),2]) # preallocate list
+
+    # define time vector, integrate from time point 0 to 15, using 1000
+    # sub-divisions of time
+    # note that units of time are arbitrary here
+    t = np.linspace(0, 15, 1000)
+
+    # set initial conditions for two populations (10 resources and 5 consumers per 
+    # unit area), and convert the two into an array (because our dCR_dt function
+    # takes an array as input)
+    R0 = 10
+    C0 = 5
+
+    # set K, which is the carrying capacity
+    K = 33
+
+    # preallocate list
+    popu = np.zeros([len(t),2])
     
     # discrete time version of LV model
     for i in range(len(t)): 
@@ -56,7 +58,7 @@ def main(r = 1.0, a = 0.1, z = 1.5, e = 0.75):
         Cn = C0 * (1 - z + e * a * R0)
         R0 = Rn
         C0 = Cn
-        popu[yr,:]= [Rn,Cn]
+        popu[i,:]= [Rn,Cn]
     
     # visualize with matplotlib
     f1 = p.figure()
@@ -86,15 +88,15 @@ def main(r = 1.0, a = 0.1, z = 1.5, e = 0.75):
 
 if __name__ == "__main__":
     if len(sys.argv) == 5:
-    # assign sys argvs to parameter values
-    r = float(sys.argv[1])
-    a = float(sys.argv[2])
-    z = float(sys.argv[3])
-    e = float(sys.argv[4])
-    # K = float(sys.argv[5])
-    main(r, a, z, e)
-    sys.exit()
+        # assign sys argvs to parameter values
+        r = float(sys.argv[1])
+        a = float(sys.argv[2])
+        z = float(sys.argv[3])
+        e = float(sys.argv[4])
+        # K = float(sys.argv[5])
+        main(r, a, z, e)
+        sys.exit()
     else:
-    print("Lacking user inputs, using defaults")
-    main()
-    sys.exit()
+        print("Lacking user inputs, using defaults")
+        main()
+        sys.exit()
