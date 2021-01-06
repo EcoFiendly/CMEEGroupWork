@@ -9,9 +9,7 @@
 # clear out workspace
 rm(list = ls())
 
-require(dplyr)
-require(tidyr)
-require(broom)
+require(tidyverse)
 
 # load data
 df <- read.csv("../Data/EcolArchives-E089-51-D1.csv")
@@ -45,9 +43,12 @@ ss1 <- df[which(df$Type.of.feeding.interaction == "piscivorous" &
 ss2 <- df[which(df$Type.of.feeding.interaction == "planktivorous" &
                 df$Predator.lifestage == "juvenile" &
                 df$Location == "Gulf of Alaska"), ]
-ss3<- df[which(df$Type.of.feeding.interaction == "predacious" &
+ss3 <- df[which(df$Type.of.feeding.interaction == "predacious" &
                  df$Predator.lifestage == "adult" &
                  df$Location == "Gulf of Maine, New England"), ]
+ss4 <- df[which(df$Type.of.feeding.interaction == "piscivorous" &
+               df$Predator.lifestage == "juvenile" &
+               df$Location == "Off the Bay of Biscay"), ]
 
 linregb <- df %>%
   # filtering entries found in the above subsets
@@ -75,13 +76,14 @@ ss3<- df[which(df$Type.of.feeding.interaction == "predacious" &
 
 linregc <- df %>%
   # filtering entries found in the above subsets
-  filter(!Record.number %in% c(30914, 30929, 277, 321, 2204, 2221, 2222, 2223,
-                               2224)) %>%
+  # filter(!Record.number %in% c(30914, 30929, 277, 321, 2204, 2221, 2222, 2223,
+  #                             2224)) %>%
   # select columns required and group by feeding type, predator lifestage and
   # location
   dplyr::select(Predator.mass, Prey.mass, Predator.lifestage,
                 Type.of.feeding.interaction, Location) %>%
   group_by(Type.of.feeding.interaction, Predator.lifestage, Location) %>%
+  filter(n() > 2) %>%
   # lm calculation and store calculations to a dataframe
   do(mod = lm(log(Predator.mass) ~ log(Prey.mass), data = .)) %>%
   mutate(Regression.slope = summary(mod)$coeff[2],
@@ -89,6 +91,7 @@ linregc <- df %>%
          R.squared = summary(mod)$adj.r.squared,
          F.statistic = summary(mod)$fstatistic[1],
          p.value = summary(mod)$coeff[8]) %>%
+  # filter(summary(mod)$adj.r.squared == 1) %>%
   # remove mod column
   dplyr::select(-mod)
 
