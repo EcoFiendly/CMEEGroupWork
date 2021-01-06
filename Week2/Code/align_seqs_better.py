@@ -1,166 +1,140 @@
 #!/usr/bin/env python3
 
 """
-Script that takes DNA sequences as input from a single external file and 
-aligns two DNA sequences such that they are as similar as possible. The best 
-alignment, along with its corresponding score is then saved in a text file to 
-the /Results/ directory. 
-
-This script is able to take user arguments from cli. However, if no arguments 
-were provided, the script defaults to two fasta files in the /Data/ directory.
-
-Script starts by positioning the beginning of the shorter sequence at all 
-positions (bases) of the longer one (the start position), and count the number 
-of bases matched. The alignment with the highest score wins. Ties are possible, 
-in which case, an arbitrary alignment (e.g. first or last) with the highest 
-score is taken.
-
-This script also saves equally good alignments when they share the same score as
-the best alignment.
+Programme that takes the DNA sequences from two (argued or default) FASTA files
+and saves the best alignment(s) along with corresponding score(s) in a single
+text file - includes alignments with partial overlap of strands at both ends.
 """
 
-__appname__ = '[align_seqs_better.py]'
-__author__ = 'Yewshen Lim (y.lim20@imperial.ac.uk)'
+__author__ = 'Group 4'
 __version__ = '0.0.1'
-__license__ = ""
 
-## Imports ##
-import sys # module to interface our program with the operating system
-import pickle
+import sys
 
-## Constants ##
-
-# Read cli arguments using the sys module
-
-if len(sys.argv) != 3:
-    print("No arguments provided, defaulting to 2 fasta files in ../Data/")
-    # opens the default files
-    with open('../Data/407228326.fasta', 'r') as f1:
-        seq1 = [line.strip() for line in f1]
-    with open('../Data/407228412.fasta', 'r') as f2:
-        seq2 = [line.strip() for line in f2]
-else:
-    # opens the files provided as arguments
-    with open(sys.argv[1], 'r') as f1:
-        seq1 = [line.strip() for line in f1]
-    with open(sys.argv[2], 'r') as f2:
-        seq2 = [line.strip() for line in f2]
-
-# Populate s1 and s2 with sequences from file1 and file2 respectively
-# also skips the line if it starts with > (skips lines which are not sequences)
-s1 = []
-for row in seq1:
-    if row[0:1] != '>':
-        row = row.strip() # removes '\n'
-        s1.append(row)
-
-s2 = []
-for row in seq2:
-    if row[0:1] != '>':
-        row = row.strip() # removes '\n'
-        s2.append(row)
-
-# convert the lists to strings
-s1 = "".join(s1)
-s2 = "".join(s2)
-
-# Assign the longer sequence s1, and the shorter to s2
-# l1 is length of the longest, l2 that of the shortest
-
-l1 = len(s1)
-l2 = len(s2)
-if l1 <= l2:
-    s1, s2 = s2, s1 # swap the two seqences
-    l1, l2 = l2, l1 # swap the two lengths
-
-# for finding the best match (highest score) for the two sequences
-
-my_best_align = None
-my_best_score = -1
-
-## Functions ##
-
-# A function that computes a score by returning the number of matches starting
-# from arbitrary startpoint (chosen by user)
-def calculate_score(s1, s2, l1, l2, startpoint):
+def get_seq(in_fpath):
     """
-    Computes a score by returning the number of matches starting from an 
-    arbitrary startpoint (chosen by user)
+    Reads the file entered as argument, creates a string (seq) of all data
+    contained in the file after the first line.
+    
+    Parameters:
+    
+    in_fpath - file path to fasta file used for data extraction
+    
+    
+    Returns:
+    
+    seq - fasta data extracted from input fasta file
+    """
+    seq = ""
+    with open(in_fpath, "r") as f:
+        seq_lines = f.read().splitlines(True)
+        for line in seq_lines[1:]:
+            seq = seq + line.strip()
+    return seq
 
-        Parameters:
-            s1 (str): string containing the longer sequence
-            s2 (str): string containing the shorter sequence
-            l1 (int): length of s1
-            l2 (int): length of s2
-            startpoint: arbitrary startpoint chosen by user
 
-        Returns:
-            score (int): number of matches between the sequences
-            matched (str): matched string with * as match and - as no match
-
+def calculate_score(s1, s2, l1, l2, startpoint): 
+    """
+    Computes score of the alignment given as parameters, 1 point per matching
+     base pair
+     
+    Parameters:
+    
+    s1 - longer input sequence, with (l2-1)*"."s appended to either end 
+    s2 - shorter input sequence
+    l1 - length of s1 prior to "."s appendage to either end
+    l2 - length of s2
+    startpoint - point along s1 at which alignment calc_score with s2 is occurrs
+    
+    
+    Returns:
+    
+    score - number of matched bases between s1 and s2
+    matched - sequence of "."s, "-"s and "*"s to annotate alignment
+    shift - "."s before s2 to indicate there are no matches between sequences
+    end_shift - "."s after s2 to indicate there are no matches between sequences
     """
     matched = "" # to hold string displaying alignements
     score = 0
-    for i in range(l2):
-        if (i + startpoint) < l1:
-            if s1[i + startpoint] == s2[i]: # if the bases match
-                matched = matched + "*"
-                score = score + 1
+    for i in range(l2):  
+        if (i + startpoint) < (l1 + l2 - 1): 
+            if l2 - i > startpoint + 1:
+                matched = matched + "."  #dots before they start overlapping
+            elif s1[i + startpoint] == s2[i]: # if the bases match
+                matched = matched + "*" #matched bases
+                score = score + 1 #adds one to score
             else:
-                matched = matched + "-"
+                matched = matched + "-" #not matched bases
+    shift, end_shift = startpoint * ".", (l2 + l1 - startpoint - 2) * "."
+    # dots at end, but only up until end of dots tailing l1
+    # if startpoint is bigger than l1-2, end shift is less than l2 according to
+    # this formula. the below check stops it from getting less than l2.
+    return score, matched, shift, end_shift
 
-    # some formatted output, commented out to speed up the code
-    # print("." * startpoint + matched)           
-    # print("." * startpoint + s2)
-    # print(s1)
-    # print(score) 
-    # print(" ")
 
-    return score
+def main(argv):
+    """
+    Gets input from files, assigns longer seq to s1 & vv, calculates scores,
+    and saves highest-scoring alignment(s) in new file with explanation
+    """
+    
+    # gets seqs from the two argued .fasta files,
+    # or if not provided gets seqs from the default files in data/
+    if len(sys.argv) == 3 and sys.argv[1].endswith("fasta") == True \
+    and sys.argv[2].endswith("fasta") == True:
+        print("Aligning input sequences... please wait.")
+        seq1, seq2 = get_seq(sys.argv[1]), get_seq(sys.argv[2]) 
+    else: #if not, inform them and use the default fasta files
+        print("Two .fasta files not provided. Using defaults from Data/")
+        seq1 = get_seq("../Data/407228326.fasta")
+        seq2 = get_seq("../Data/407228412.fasta")
+    
+    
+    # Assign the longer sequence to s1, and the shorter to s2
+    l1, l2 = len(seq1), len(seq2)
+    if l1 >= l2:
+        s1, s2 = ((l2 - 1) * "." + seq1 + (l2 - 1) * "."), seq2
+        #puts l2-1 "."s both sides of l1, allows alignment of all overlap combos
+    else:
+        s1, s2 = ((l1 - 1) * "." + seq2 + (l1 - 1) * "."), seq1
+        l1, l2 = l2, l1 
 
-# Test the function with some example starting points:
-# calculate_score(s1, s2, l1, l2, 0)
-# calculate_score(s1, s2, l1, l2, 1)
-# calculate_score(s1, s2, l1, l2, 5)
-
-# Open a file for pickle
-pf = open('../Results/all_good_aligns.txt', 'wb') # save pickle file as .p (or else might run into issues saving and reopening later)
-# Create an empty list to capture the best score and equally good alignments
-all_good = []
-
-for i in range(l1): # Note that you just take the last alignment with the highest score
-    z = calculate_score(s1, s2, l1, l2, i)
-    if z > my_best_score:
-        my_best_align = "." * i + s2
-        my_best_score = z
-        all_good = [] # empty out scores which are worse than current one
-        all_good.append(my_best_align)
-        all_good.append(my_best_score)
-    elif z == my_best_score:
-        my_best_align = "." * i + s2
-        my_best_score = z
-        all_good.append(my_best_align)
-        all_good.append(my_best_score)
-
-# write all_good to pf
-pickle.dump(all_good, pf)
-pf.close()
-
-print(my_best_align)
-print(s1)
-print("Best score:", my_best_score)
-
-# Save output to a text file in /Results/ directory
-sys.stdout = open('../Results/best_align.txt', 'w')
-pf = open('../Results/all_good_aligns.txt', 'rb')
-all_good = pickle.load(pf)
-print("Best score is:", str(all_good[1]))
-print("Alignments with such score:")
-# for loop to write all the equally good alignments (if > 1) to the output file
-for i in range(len(all_good)):
-    if i % 2 == 0:
-        print(all_good[i])
-        print("")
-        print(s1)
-pf.close() # close pickle file
-sys.stdout.close() # close output file
+    # writes alignment(s) with highest score into output file
+    my_best_score, best_alignments = -1, [] #so 0 beats best score
+    for i in range(l1 + l2 -1):
+        score, matched, shift, end_shift = calculate_score(s1, s2, l1, l2, i)
+        #assigns returns from calc_score function to these variables
+        if score >= my_best_score:
+            statement = "This alignment occurs when the smaller strand (" + \
+            str(l2) + "nt in length) attaches from base " + str(i - l2 + 2) + \
+            " of the larger strand, with the highest score of " + str(score) + \
+            ":\n"
+            #statement explaining the alignment in detail
+            best_comparison_highSP =  (shift + matched + (l2 - 1) * "." + "\n")
+            best_comparison_lowSP = (shift + matched + end_shift + "\n")
+            best_s2, best_s1 = (shift + s2 + end_shift + "\n"), (s1 + "\n\n\n")
+            #formats the matching, s1 and s2 lines to line-up neatly
+            if i < l1 - 1:
+                best_alignment = (str(statement) + str(best_comparison_lowSP) \
+                + str(best_s2) + str(best_s1))
+            else:
+                best_alignment = (str(statement) + str(best_comparison_highSP) \
+                + str(best_s2) + str(best_s1))
+            # uses returned variables to write a statement about the alignment 
+            # giving its score and startpoint, and assigns 3 lines of alignment 
+            # (s1, s2 and matching bases) to a variable each for later printing
+            if score > my_best_score:
+                my_best_score = score
+                best_alignments = [best_alignment]
+            elif score == my_best_score:
+                best_alignments.append(best_alignment)
+    f = open('../Results/fasta_better_align.txt', 'w')
+    for string in best_alignments:
+        f.write(string)
+    f.close()
+    print("Done!")
+    return None
+        
+if (__name__ == "__main__"):
+    status = main(sys.argv)
+    sys.exit(status)

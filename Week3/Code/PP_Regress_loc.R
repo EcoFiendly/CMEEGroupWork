@@ -1,4 +1,4 @@
-# Author: Yewshen Lim (y.lim20@imperial.ac.uk)
+# Author: Group 4
 # Script: PP_Regress.R
 # Created: Nov 2020
 #

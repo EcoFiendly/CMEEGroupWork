@@ -10,6 +10,18 @@ __versin__ = '0.0.1'
 import sys
 import numpy as np
 
+# translate sys.argv to open file
+inpu = sys.argv[1]
+file = open(inpu, "r")
+
+# initialize empty list
+data = []
+# append lines from file to list
+for line in file:
+    line = line.strip().split(",")
+    data.append(line)
+file.close()
+
 def TreeHeight(degrees, distance):
     """
     This function calculates heights of trees given distance of each tree from
@@ -27,38 +39,19 @@ def TreeHeight(degrees, distance):
 
     return(height)
 
-def main(argv):
-    """
-    Applies TreeHeight function on data from an input file provided as a cli 
-    argument
-    """
-    # initialize empty list
-    TreeData = []
-    # populates the list
-    with open(sys.argv[1],'r') as f: 
-        for line in f: 
-            line = line.strip().split(",")
-            TreeData.append(line)
-    f.close()
+# add tree heights column to list
+data[0].append("Tree.Height.m")
+# loop through data to calculate heights and add to column
+for i in range(1,len(data)):
+    height = TreeHeight(float(data[i][1]), float(data[i][2]))
+    data[i].append(height)
 
-    # Add output of TreeHeight for each tree to a new column in TreeData
-    TreeData[0].append("\"Tree.Height.m\"")
-    for j in range(1, len(TreeData)):
-        height = TreeHeight(float(TreeData[j][1]), float(TreeData[j][2]))
-        TreeData[j].append(height)
+# set name of output file
+result_name = "../Results/" + inpu.split("/")[1].split(".")[0] + "_treeheights.csv"
+result = open(result_name, "w")
+# write to results
+for i in data:
+    result.write(i[0]+","+i[1]+","+i[2]+","+str(i[3]))
+    result.write("\n")
 
-    # Write data to output file
-    # splits the path and extension away from the file, and concatenate it into 
-    # desired path and format
-    output = "../Results/" + sys.argv[1].split("/")[2].split(".")[0] + "_treeheights.csv"
-    with open(output, "w") as g:
-        for k in TreeData:
-            g.write(k[0] + "," + k[1] + "," + k[2] + "," + str(k[3]) + "\n")
-    g.close()
-
-    return(0)
-
-if (__name__ == "__main__"):
-    status = main(sys.argv)
-    sys.exit(status)
-
+result.close()

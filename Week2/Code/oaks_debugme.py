@@ -5,10 +5,8 @@ Debug practice, where the bug prevents oaks from being found
 Debug by writing doctests
 """
 
-__appname__ = '[oaks_debugme.py]'
-__author__ = 'Yewshen Lim (y.lim20@imperial.ac.uk)'
+__author__ = 'Group 4'
 __version__ = '0.0.1'
-__license__ = ""
 
 ## Imports ##
 
